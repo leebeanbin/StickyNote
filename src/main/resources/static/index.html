@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Memo Service</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@500&display=swap" rel="stylesheet">
+  <style>
+    @import url('https://spoqa.github.io/spoqa-han-sans/css/SpoqaHanSansNeo.css');
+    @import url(//spoqa.github.io/spoqa-han-sans/css/SpoqaHanSans-kr.css);
+
+    body {
+      margin: 0;
+      font-family: 'Noto Sans KR', sans-serif;
+      background: #dee2e6;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .wrap {
+      display: flex;
+      justify-content: space-between;
+      width: 90%;
+      margin: 20px 0;
+    }
+
+    .area-read {
+      width: 30%;
+      background-color: #ffffff;
+      border-radius: 5px;
+      padding: 10px;
+      height: 600px;
+      overflow-y: auto;
+      margin-bottom: 20px;
+    }
+
+    .input-field {
+      width: 80%;
+      background-color: #ffffff;
+      border-radius: 5px;
+      padding: 20px; /* Added padding for all sides */
+      display: flex;
+      flex-direction: column;
+      margin: 20px 0;
+    }
+
+    input[type="text"], input[type="password"], input[type="date"], textarea, select {
+      width: calc(100% - 40px); /* Adjust width to account for padding */
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 5px;
+      border: 1px solid #ced4da;
+    }
+
+    button {
+      width: calc(100% - 40px); /* Ensure button aligns with inputs */
+      padding: 10px;
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    .card {
+      position: relative;
+      border-bottom: 1px solid #e9ecef;
+      padding: 8px;
+      margin-bottom: 8px;
+    }
+
+    .metadata {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: #adb5bd;
+    }
+
+    .title {
+      font-size: 16px;
+      font-weight: bold;
+      color: #343a40;
+    }
+
+    .contents {
+      font-size: 12px;
+      color: #495057;
+    }
+
+    .edit-btn, .delete-btn {
+      position: absolute;
+      top: 5px;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+
+    .edit-btn {
+      right: 35px;
+      background-image: url('/Users/leejungbin/Downloads/StickyNote/src/main/resources/images/Edit.png'); /* Ensure you change path as needed */
+      background-size: cover;
+      height: 18px;
+      width: 18px;
+    }
+
+    .delete-btn {
+      right: 10px;
+      background-image: url('/Users/leejungbin/Downloads/StickyNote/src/main/resources/images/Delete.png'); /* Ensure you change path as needed */
+      background-size: cover;
+      height: 18px;
+      width: 18px;
+    }
+  </style>
+</head>
+<body>
+<div class="header">
+  <h2>Memo Scheduler</h2>
+  <p>Enter the news you want to share below.</p>
+</div>
+<div class="wrap">
+  <div id="yesterday" class="area-read"><h3>어제 한 일</h3></div>
+  <div id="today" class="area-read"><h3>오늘 할 일</h3></div>
+  <div id="tomorrow" class="area-read"><h3>내일 할 일</h3></div>
+</div>
+<div class="input-field">
+  <input type="text" id="author" placeholder="작성자">
+  <input type="text" id="title" placeholder="제목">
+  <input type="password" id="password" placeholder="비밀번호">
+  <input type="date" id="date">
+  <textarea id="content" placeholder="내용"></textarea>
+  <select id="category">
+    <option value="">카테고리 선택</option>
+    <option value="yesterday">어제 한 일</option>
+    <option value="today">오늘 할 일</option>
+    <option value="tomorrow">내일 할 일</option>
+  </select>
+  <button onclick="writePost()">Post Memo</button>
+</div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script>
+  $(document).ready(function () {
+    fetchMemos();
+  });
+
+  function fetchMemos() {
+    $.ajax({
+      type: 'GET',
+      url: '/api/notes',
+      success: function (notes) {
+        notes.forEach(note => {
+          addMemoToCategory(note);
+        });
+      }
+    });
+  }
+
+  function addMemoToCategory(note) {
+    let cardHtml = `
+      <div class="card">
+        <div class="metadata">
+          <span>${note.date}</span>
+          <span>${note.author}</span>
+        </div>
+        <div class="title">${note.title}</div>
+        <div class="contents">${note.content.substring(0, 100)}</div>
+        <button class="edit-btn" onclick="editMemo('${note.id}')">Edit</button>
+        <button class="delete-btn" onclick="deleteMemo('${note.id}')">Delete</button>
+      </div>`;
+    $('#' + note.category).append(cardHtml);
+  }
+
+  function writePost() {
+    let author = $('#author').val();
+    let title = $('#title').val();
+    let password = $('#password').val(); // Ensure you handle passwords securely
+    let date = $('#date').val();
+    let content = $('#content').val();
+    let category = $('#category').val();
+
+    if (!author || !title || !password || !date || !content || !category) {
+      alert('All fields must be filled out');
+      return;
+    }
+
+    let data = {author, title, password, date, content, category};
+
+    $.ajax({
+      type: "POST",
+      url: "/api/notes",
+      contentType: "application/json",
+      data: JSON.stringify(data),
+      success: function () {
+        alert('Memo added successfully');
+        location.reload();
+      },
+      error: function () {
+        alert('Error adding note');
+      }
+    });
+  }
+
+  function editMemo(id) {
+    let card = $(`.card[data-id='${id}']`);
+    let title = card.find('.title').text();
+    let content = card.find('.contents').text();
+
+    $('#title').val(title);
+    $('#content').val(content);
+
+    $('html, body').animate({
+      scrollTop: $(".input-field").offset().top
+    }, 1000);
+  }
+
+  function deleteMemo(id) {
+    if (!confirm('Are you sure you want to delete this note?')) return;
+
+    $.ajax({
+      type: "DELETE",
+      url: `/api/notes/${id}`,
+      success: function () {
+        alert('Memo deleted successfully');
+        location.reload();
+      },
+      error: function () {
+        alert('Error deleting note');
+      }
+    });
+  }
+</script>
+</body>
+</html>
