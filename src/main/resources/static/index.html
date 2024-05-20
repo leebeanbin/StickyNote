@@ -92,30 +92,6 @@
       color: #495057;
     }
 
-    .edit-btn, .delete-btn {
-      position: absolute;
-      top: 5px;
-      background: none;
-      border: none;
-      cursor: pointer;
-    }
-
-    .edit-btn {
-      right: 35px;
-      background-image: url('/Users/leejungbin/Downloads/StickyNote/src/main/resources/images/Edit.png');
-      background-size: cover;
-      height: 18px;
-      width: 18px;
-    }
-
-    .delete-btn {
-      right: 10px;
-      background-image: url('/Users/leejungbin/Downloads/StickyNote/src/main/resources/images/Delete.png');
-      background-size: cover;
-      height: 18px;
-      width: 18px;
-    }
-
     /* 모달 창 스타일 */
     .modal {
       display: none; /* 기본적으로 숨김 */
@@ -225,8 +201,6 @@
         </div>
         <div class="title">${note.title}</div>
         <div class="contents">${note.content.substring(0, 100)}</div>
-        <button class="edit-btn" onclick="editMemo('${note.id}')">Edit</button>
-        <button class="delete-btn" onclick="deleteMemo('${note.id}')">Delete</button>
       </div>`;
     $('#' + note.category).append(cardHtml);
   }
@@ -261,64 +235,38 @@
     });
   }
 
-  function editMemo(id) {
-    let card = $(`.card[data-id='${id}']`);
-    let title = card.find('.title').text();
-    let content = card.find('.contents').text();
-
-    $('#title').val(title);
-    $('#content').val(content);
-
-    $('html, body').animate({
-      scrollTop: $(".input-field").offset().top
-    }, 1000);
-  }
-
-  function deleteMemo(id) {
-    if (!confirm('Are you sure you want to delete this note?')) return;
-
+  // 모달 창을 열어 메모의 상세 정보를 보여주는 함수
+  function showMemoDetails(id) {
     $.ajax({
-      type: "DELETE",
+      type: 'GET',
       url: `/api/notes/${id}`,
-      success: function () {
-        alert('Memo deleted successfully');
-        location.reload();
+      success: function(note) {
+        $('#modal-title').text(note.title);
+        $('#modal-author').text(note.author);
+        $('#modal-date').text(note.date);
+        $('#modal-content').text(note.content);
+
+        // 모달을 연다
+        let modal = document.getElementById('myModal');
+        modal.style.display = "block";
+
+        // 모달 닫기 이벤트 처리
+        document.getElementsByClassName("close")[0].onclick = function() {
+          modal.style.display = "none";
+        }
+
+        window.onclick = function(event) {
+          if (event.target == modal) {
+            modal.style.display = "none";
+          }
+        }
       },
-      error: function () {
-        alert('Error deleting note');
+      error: function() {
+        alert('메모의 상세 정보를 가져오는데 실패했습니다.');
       }
     });
   }
 
-  // 모달 창을 열어 메모의 상세 정보를 보여주는 함수
-  function showMemoDetails(id) {
-    let card = $(`.card[data-id='${id}']`);
-    let title = card.find('.title').text();
-    let author = card.find('.metadata span:nth-child(2)').text();
-    let date = card.find('.metadata span:nth-child(1)').text();
-    let content = card.find('.contents').text();
-
-    $('#modal-title').text(title);
-    $('#modal-author').text(author);
-    $('#modal-date').text(date);
-    $('#modal-content').text(content);
-
-    // 모달을 연다
-    let modal = document.getElementById('myModal');
-    let span = document.getElementsByClassName("close")[0];
-
-    modal.style.display = "block";
-
-    span.onclick = function() {
-      modal.style.display = "none";
-    }
-
-    window.onclick = function(event) {
-      if (event.target == modal) {
-        modal.style.display = "none";
-      }
-    }
-  }
 
   function searchMemos() {
     let keyword = $('#search-input').val().toLowerCase();
@@ -349,8 +297,6 @@
                 </div>
                 <div class="title">${note.title}</div>
                 <div class="contents">${note.content.substring(0, 100)}</div>
-                <button class="edit-btn" onclick="editMemo('${note.id}')">Edit</button>
-                <button class="delete-btn" onclick="deleteMemo('${note.id}')">Delete</button>
               </div>`;
             $('#search-results').append(cardHtml);
           });
