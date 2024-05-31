@@ -30,8 +30,7 @@ public class CommentService {
 		Note note = noteRepository.findById(noteId)
 			.orElseThrow(() -> new RuntimeException("Note not found"));
 
-		Comment newComment = new Comment(note, requestDto.getAuthor(), requestDto.getComment());
-		// note.addComment(newComment);
+		Comment newComment = new Comment(note.getId(), requestDto.getAuthor(), requestDto.getComment());
 
 		Comment saveComment = commentRepository.save(newComment); // Entity -> Repo
 		return new CommentResponseDto(saveComment); // Repo -> ResponseDto -> make the view
@@ -46,27 +45,32 @@ public class CommentService {
 	// get all the comments by note id
 	@Transactional(readOnly = true)
 	public List<CommentResponseDto> getCommnets(Long noteId) {
-		List<Comment> comments = commentRepository.findByNoteId(noteId);
+		List<Comment> comments = commentRepository.findByNoteIdAndDeletedFalse(noteId);
 		return comments.stream().map(CommentResponseDto::new).collect(Collectors.toList());
 	}
 
-	//TODO - Excpetion 활용법 정
+	//TODO - Excpetion 활용법 정리
 	@Transactional
 	public Comment updateComment(Long noteId, Long commentId, CommentRequestDto requestDto) {
-		Comment comment = commentRepository.findByIdAndNoteId(commentId, noteId).orElseThrow(
+		Comment comment = commentRepository.findByIdAndNoteIdAndDeletedFalse(commentId, noteId).orElseThrow(
 			() -> new IllegalArgumentException("Failed to find comment with id," + noteId)
 		);
 
-		// 엔티티 값을 수정할 때 변화 감지
-		comment.setAuthor(requestDto.getAuthor());
-		comment.setComment(requestDto.getComment());
+		if(!comment.getAuthor().equals(requestDto.getAuthor())){
+			throw new RuntimeException("You are not authorized to update this comment");
+		}
 
-		return commentRepository.save(comment);
+		comment.update(requestDto);
+
+		return comment;
 	}
 
+
+	// TODO : soft delete 정리
 	public void deleteComment(Long noteId, Long commentId) {
-		Comment comment = commentRepository.findByIdAndNoteId(commentId, noteId)
+		Comment comment = commentRepository.findByIdAndNoteIdAndDeletedFalse(commentId, noteId)
 			.orElseThrow(() -> new RuntimeException("Comment not found or does not belong to the given note"));
-		commentRepository.delete(comment);
+		comment.softDelete(); // 논리적 삭제
+		commentRepository.save(comment);
 	}
 }

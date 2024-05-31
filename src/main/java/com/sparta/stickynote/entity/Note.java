@@ -41,9 +41,6 @@ public class Note extends Timestamped{
 	@Column(name = "content", nullable = false, length = 500)
 	private String content;
 
-	@OneToMany(mappedBy = "note", cascade = CascadeType.ALL, orphanRemoval = true)
-	private List<Comment> comments = new ArrayList<>();
-
 	@Builder
 	public Note(String author, String title, String password, String content) {
 		this.author = author;
@@ -56,15 +53,5 @@ public class Note extends Timestamped{
 		this.author = requestDto.getAuthor();
 		this.title = requestDto.getTitle();
 		this.content = requestDto.getContent();
-	}
-
-	public void addComment(Comment comment) {
-		comments.add(comment);
-		comment.setNote(this);
-	}
-
-	public void removeComment(Comment comment) {
-		comments.remove(comment);
-		comment.setNote(null);
 	}
 }

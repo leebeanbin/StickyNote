@@ -2,6 +2,9 @@ package com.sparta.stickynote.entity;
 
 import java.time.LocalDateTime;
 
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
+
 import com.sparta.stickynote.dto.CommentRequestDto;
 
 import jakarta.persistence.Column;
@@ -23,33 +26,39 @@ import lombok.Setter;
 @Setter
 @Table(name = "comment")
 @NoArgsConstructor
-public class Comment{
+public class Comment {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "id" , nullable = false)
+	@Column(name = "id", nullable = false)
 	private Long id;
-	@Column(name = "author" , nullable = false)
+	@Column(name = "author", nullable = false)
 	private String author;
-	@Column(name = "comment" , nullable = false)
+	@Column(name = "comment", nullable = false)
 	private String comment;
 
 	private LocalDateTime createdAt;
 
-	@ManyToOne(fetch = FetchType.LAZY) // 모든 상황에 필요한 것이 아니기 때문입니다.
-	@JoinColumn(name = "noteId", nullable = false)
-	private Note note;
+	@JoinColumn(name = "note_id", nullable = false)
+	private Long noteId;
+
+	@Column(name = "deleted", nullable = false)
+	private Boolean deleted = Boolean.FALSE; // 기본값을 FALSE로 설정
 
 	@Builder
-	public Comment(Note note,String author, String comment) {
-		this.note = note;
+	public Comment(Long noteId, String author, String comment) {
+		this.noteId = noteId;
 		this.author = author;
 		this.comment = comment;
 		this.createdAt = LocalDateTime.now();
 	}
 
-	public void update(CommentRequestDto requestDto){
-		this.author = requestDto.getAuthor();
+	// Update는 댓글 내용만 수정 가능하게 한다.
+	public void update(CommentRequestDto requestDto) {
 		this.comment = requestDto.getComment();
 		this.createdAt = LocalDateTime.now();
+	}
+
+	public void softDelete() {
+		this.deleted = true;
 	}
 }

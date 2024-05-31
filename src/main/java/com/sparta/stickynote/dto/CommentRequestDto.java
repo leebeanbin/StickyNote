@@ -11,11 +11,11 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class CommentRequestDto {
-	private Note note;
+	private Long noteId;
 	private String author;
 	private String comment;
 
-	public Comment toEntity(Note note) {
-		return new Comment(note, this.author, this.comment);
+	public Comment toEntity(Long noteId) {
+		return new Comment(noteId, this.author, this.comment);
 	}
 }
