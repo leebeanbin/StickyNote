@@ -20,8 +20,8 @@ public class NoteService {
 
 	public NoteResponseDto createNote(NoteRequestDto requestDto) {
 		// RequestDto -> Entity -> DB의 한줄을 차지합니다!
-		Note memo = new Note(requestDto);
-		Note saveNote = noteRepository.save(memo);
+		var newNote = requestDto.toEntity();
+		Note saveNote = noteRepository.save(newNote);
 
 		// Entity -> ResponseDto
 		NoteResponseDto memoResponseDto = new NoteResponseDto(saveNote);

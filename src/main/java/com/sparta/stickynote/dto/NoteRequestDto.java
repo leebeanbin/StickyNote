@@ -4,6 +4,8 @@ import java.time.LocalDate;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
+import com.sparta.stickynote.entity.Note;
+
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.NotBlank;
@@ -18,10 +20,16 @@ public class NoteRequestDto {
 	@NotBlank
 	@Max(200)
 	private String title;
-	@DateTimeFormat(pattern =  "yyyy-MM-dd")
-	private LocalDate date;
 	@NotBlank
 	private String password;
 	private String content;
-	private String category;
+
+	public Note toEntity(){
+		return Note.builder()
+			.author(author)
+			.title(title)
+			.password(password)
+			.content(content)
+			.build();
+	}
 }

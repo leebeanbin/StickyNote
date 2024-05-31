@@ -19,7 +19,7 @@ import com.sparta.stickynote.service.NoteService;
 // @Controller -> thymleaf (ssr, Sever side Rendering ?)
 // @RestController -> Json(Jackson) -> Object / Object -> Json (Client side rendering)
 @RestController
-@RequestMapping("/api/notes")
+@RequestMapping("/notes")
 public class NoteController {
 
 	private final NoteService noteService;

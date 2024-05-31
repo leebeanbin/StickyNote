@@ -1,14 +1,18 @@
 package com.sparta.stickynote.entity;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.sparta.stickynote.dto.NoteRequestDto;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.Builder;
 import lombok.Getter;
@@ -34,26 +38,33 @@ public class Note extends Timestamped{
 	private String title;
 	@Column(name = "password", nullable = false)
 	private String password;
-	@Column(name = "date", nullable = false)
-	private LocalDate date;
 	@Column(name = "content", nullable = false, length = 500)
 	private String content;
-	@Column(name = "category", nullable = false)
-	private String category;
 
-	public Note(NoteRequestDto requestDto) {
-		this.author = requestDto.getAuthor();
-		this.title = requestDto.getTitle();
-		this.password = requestDto.getPassword();
-		this.content = requestDto.getContent();
-		this.category = requestDto.getCategory();
-		this.date = requestDto.getDate();
+	@OneToMany(mappedBy = "note", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<Comment> comments = new ArrayList<>();
+
+	@Builder
+	public Note(String author, String title, String password, String content) {
+		this.author = author;
+		this.title = title;
+		this.password = password;
+		this.content = content;
 	}
 
 	public void update(NoteRequestDto requestDto){
 		this.author = requestDto.getAuthor();
 		this.title = requestDto.getTitle();
 		this.content = requestDto.getContent();
-		this.category = requestDto.getCategory();
+	}
+
+	public void addComment(Comment comment) {
+		comments.add(comment);
+		comment.setNote(this);
+	}
+
+	public void removeComment(Comment comment) {
+		comments.remove(comment);
+		comment.setNote(null);
 	}
 }

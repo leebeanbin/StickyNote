@@ -14,8 +14,6 @@ public class NoteResponseDto {
 	private String title;
 	private String password;
 	private String content;
-	private String category;
-	private LocalDate date;
 	private LocalDateTime createdAt;
 	private LocalDateTime modifiedAt;
 
@@ -27,10 +25,8 @@ public class NoteResponseDto {
 		this.title = note.getTitle();
 		this.password = note.getPassword();
 		this.content = note.getContent();
-		this.category = note.getCategory();
 		this.createdAt = note.getCreatedAt();
 		this.modifiedAt = note.getModifiedAt();
-		this.date = note.getDate();
 	}
 
 }
