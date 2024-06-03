@@ -1,7 +1,9 @@
 package com.sparta.stickynote.controller;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -22,41 +24,72 @@ import com.sparta.stickynote.service.CommentService;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/notes/comments")
+@RequestMapping("/notes/{noteId}/comments")
 @RequiredArgsConstructor
 public class CommentController {
 
 	private final CommentService commentService;
 
+	// noteId를 입력해서 service에서 유효한지 검증한다.
 	@PostMapping
-	public ResponseEntity<CommentResponseDto> createComment(@RequestParam Long noteId, @RequestBody CommentRequestDto commentRequestDto) {
-		CommentResponseDto responseDto = commentService.createComment(noteId, commentRequestDto);
-		return ResponseEntity.ok().body(responseDto);
+	public ResponseEntity<CommentResponseDto> createComment(
+		@PathVariable(name = "noteId") Long noteId,
+		@RequestBody CommentRequestDto commentRequestDto)
+	{
+		return ResponseEntity.status(HttpStatus.CREATED).body(
+			commentService.createComment(noteId, commentRequestDto)
+		);
 	}
 
-	@GetMapping("/{noteId}")
-	public ResponseEntity<CommentResponseDto> getComment(@Validated @PathVariable Long noteId, @RequestParam Long commentId) {
-		CommentResponseDto comment = commentService.getComment(noteId, commentId);
-		return ResponseEntity.ok().body(comment);
+	@GetMapping("/{commentId}")
+	public ResponseEntity<CommentResponseDto> getComment(
+		@PathVariable(name = "noteId") Long noteId,
+		@RequestParam(name = "commentId") Long commentId)
+	{
+		Comment comment = commentService.getComment(noteId, commentId);
+		CommentResponseDto responseDto = new CommentResponseDto(
+			comment.getId(),
+			comment.getComment(),
+			comment.getAuthor(),
+			comment.getNote().getId(),
+			comment.getCreatedAt()
+		);
+		return ResponseEntity.status(HttpStatus.OK).body(responseDto);
 	}
 
 	@GetMapping
-	public ResponseEntity<List<CommentResponseDto>> getComments(@Validated @RequestParam Long noteId) {
-		List<CommentResponseDto> comments = commentService.getCommnets(noteId);
-		return ResponseEntity.ok().body(comments);
+	public ResponseEntity<List<CommentResponseDto>> getAllCommnet(
+		@Validated @PathVariable(name = "noteId") Long noteId
+	)
+	{
+		List<Comment> comments = commentService.getAllComment(noteId);
+		List<CommentResponseDto> responseDtos = comments.stream()
+			.map(comment -> new CommentResponseDto(
+				comment.getId(),
+				comment.getComment(),
+				comment.getAuthor(),
+				comment.getNote().getId(),
+				comment.getCreatedAt()
+			))
+			.collect(Collectors.toList());
+		return ResponseEntity.ok().body(responseDtos);
 	}
 
 	@PutMapping("/{commentId}")
-	public ResponseEntity<CommentResponseDto> updateComment(@RequestParam Long noteId, @PathVariable Long commentId, @RequestBody CommentRequestDto commentRequestDto){
-		Comment comment = commentService.updateComment(noteId, commentId, commentRequestDto);
-		CommentResponseDto responseDto = new CommentResponseDto(comment);
-		return ResponseEntity.ok().body(responseDto);
+	public ResponseEntity<CommentResponseDto> updateComment(
+		@PathVariable(name = "noteId") Long noteId,
+		@PathVariable(name = "commentId") Long commentId,
+		@Validated @RequestBody CommentRequestDto commentRequestDto){
+		CommentResponseDto comment = commentService.updateComment(noteId, commentId, commentRequestDto);
+		return ResponseEntity.ok().body(comment);
 	}
 
 	@DeleteMapping("/{commentId}")
-	public ResponseEntity deleteComment(@RequestParam Long noteId, @PathVariable Long commentId) {
-		CommentResponseDto comment = commentService.getComment(noteId, commentId);
-		commentService.deleteComment(noteId, commentId, comment);
+	public ResponseEntity deleteComment(
+		@PathVariable(name = "noteId") Long noteId,
+		@PathVariable(name = "commentId") Long commentId,
+		@Validated @RequestBody CommentRequestDto requestDto) {
+		commentService.deleteComment(noteId, commentId, requestDto);
 		return ResponseEntity.ok().build();
 	}
 }

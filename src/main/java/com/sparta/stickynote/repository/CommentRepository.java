@@ -10,8 +10,8 @@ import com.sparta.stickynote.entity.Comment;
 
 @Repository
 public interface CommentRepository extends CrudRepository<Comment, Long> {
-	Optional<Comment> findByIdAndNoteId(Long commentId, Long noteId);
 
 	Optional<Comment> findByIdAndNoteIdAndDeletedFalse(Long id, Long noteId);
-	List<Comment> findByNoteIdAndDeletedFalse(Long noteId);
+
+	List<Comment> findAllByNoteIdAndDeletedFalse(Long noteId);
 }

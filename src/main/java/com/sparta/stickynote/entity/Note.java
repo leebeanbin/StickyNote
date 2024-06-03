@@ -1,12 +1,13 @@
 package com.sparta.stickynote.entity;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import com.sparta.stickynote.dto.NoteRequestDto;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -43,8 +44,8 @@ public class Note extends Timestamped{
 	private String content;
 
 	// note에서 Comment를 관리할 수 있게 만든다.
-	@OneToMany(mappedBy = "note")
-	List<Comment> comments = new ArrayList<>();
+	@OneToMany(mappedBy = "note", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+	List<Comment> comments;
 
 	@Builder
 	public Note(String username, String title, String password, String content) {

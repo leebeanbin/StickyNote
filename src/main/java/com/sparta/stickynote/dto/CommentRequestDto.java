@@ -1,20 +1,18 @@
 package com.sparta.stickynote.dto;
 
-import com.sparta.stickynote.entity.Comment;
-import com.sparta.stickynote.entity.Note;
-
+import jakarta.validation.constraints.NotEmpty;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
 public class CommentRequestDto {
-	private Long noteId;
+	@NotEmpty
 	private String author;
 	private String comment;
 
-	public Comment toEntity(Note note) {
-		return Comment.builder()
-			.note(note.getId()).build();
+	public CommentRequestDto(String author, String comment) {
+		this.author = author;
+		this.comment = comment;
 	}
 }
