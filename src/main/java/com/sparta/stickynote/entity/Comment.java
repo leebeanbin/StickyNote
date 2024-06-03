@@ -2,9 +2,6 @@ package com.sparta.stickynote.entity;
 
 import java.time.LocalDateTime;
 
-import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.Where;
-
 import com.sparta.stickynote.dto.CommentRequestDto;
 
 import jakarta.persistence.Column;
@@ -18,14 +15,14 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 @Entity
 @Getter
 @Setter
 @Table(name = "comment")
-@NoArgsConstructor
+@RequiredArgsConstructor
 public class Comment {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -38,8 +35,11 @@ public class Comment {
 
 	private LocalDateTime createdAt;
 
-	@JoinColumn(name = "note_id", nullable = false)
 	private Long noteId;
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "note_id", nullable = false)
+	private Note note;
 
 	@Column(name = "deleted", nullable = false)
 	private Boolean deleted = Boolean.FALSE; // 기본값을 FALSE로 설정

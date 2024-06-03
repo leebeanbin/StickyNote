@@ -1,9 +1,5 @@
 package com.sparta.stickynote.dto;
 
-import java.time.LocalDate;
-
-import org.springframework.format.annotation.DateTimeFormat;
-
 import com.sparta.stickynote.entity.Note;
 
 import jakarta.validation.constraints.Email;
@@ -16,17 +12,20 @@ import lombok.Setter;
 @Setter
 public class NoteRequestDto {
 	@Email(message = "Invalid email form")
-	private String author;
+	private String username;
 	@NotBlank
 	@Max(200)
 	private String title;
+	// TODO -- NotBlank의 검증 범위를 파악하자.
 	@NotBlank
 	private String password;
+	@Max(500)
 	private String content;
 
+	// Builder에 따른 Request에 들어온 값을 넣어 준 것 입니다.
 	public Note toEntity(){
 		return Note.builder()
-			.author(author)
+			.username(username)
 			.title(title)
 			.password(password)
 			.content(content)

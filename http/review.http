@@ -1,2 +1,0 @@
-### 1. 리뷰 작성
-GET http://localhost:8080/note/comments/create-jwt

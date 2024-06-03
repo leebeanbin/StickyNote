@@ -6,7 +6,6 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.sparta.stickynote.dto.RegisterRequest;
 import com.sparta.stickynote.dto.SigninRequest;
 import com.sparta.stickynote.entity.User;
 import com.sparta.stickynote.repository.UserRepository;

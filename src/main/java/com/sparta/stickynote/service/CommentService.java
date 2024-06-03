@@ -1,6 +1,7 @@
 package com.sparta.stickynote.service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,24 +54,29 @@ public class CommentService {
 	//TODO - Excpetion 활용법 정리
 	@Transactional
 	public Comment updateComment(Long noteId, Long commentId, CommentRequestDto requestDto) {
-		Comment comment = commentRepository.findByIdAndNoteIdAndDeletedFalse(commentId, noteId).orElseThrow(
-			() -> new IllegalArgumentException("Failed to find comment with id," + noteId)
-		);
-
-		if(!comment.getAuthor().equals(requestDto.getAuthor())){
-			throw new RuntimeException("You are not authorized to update this comment");
-		}
+		Comment comment = checkPwdGetComment(noteId, commentId, requestDto);
 
 		comment.update(requestDto);
 
 		return comment;
 	}
 
+	private Comment checkPwdGetComment(Long noteId, Long commentId, CommentRequestDto requestDto) {
+		Comment comment = commentRepository.findByIdAndNoteIdAndDeletedFalse(commentId, noteId).orElseThrow(
+			() -> new IllegalArgumentException("Failed to find comment with id," + noteId)
+		);
+
+		if(comment.getAuthor() != null
+			&& !Objects.equals(comment.getAuthor(), requestDto.getAuthor())
+			&& !Objects.equals(comment.getId(), requestDto.getNoteId())){
+			throw new IllegalArgumentException("You are not authorized to update this comment.");
+		}
+		return comment;
+	}
 
 	// TODO : soft delete 정리
-	public void deleteComment(Long noteId, Long commentId) {
-		Comment comment = commentRepository.findByIdAndNoteIdAndDeletedFalse(commentId, noteId)
-			.orElseThrow(() -> new RuntimeException("Comment not found or does not belong to the given note"));
+	public void deleteComment(Long noteId, Long commentId, CommentRequestDto requestDto) {
+		Comment comment = checkPwdGetComment(noteId, commentId);
 		comment.softDelete(); // 논리적 삭제
 		commentRepository.save(comment);
 	}
