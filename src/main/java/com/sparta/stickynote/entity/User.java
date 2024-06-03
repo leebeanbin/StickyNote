@@ -1,5 +1,7 @@
 package com.sparta.stickynote.entity;
 
+import org.hibernate.validator.constraints.Length;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -25,6 +27,7 @@ public class User {
 	@Column(nullable = false, unique = true)
 	private String username;
 
+	@Length(min = 8, max = 16)
 	@Column(nullable = false)
 	private String password;
 
@@ -40,5 +43,10 @@ public class User {
 		this.password = password;
 		this.email = email;
 		this.role = role;
+	}
+
+	public void setUserInfo(String username, String password) {
+		this.username = username;
+		this.password = password;
 	}
 }

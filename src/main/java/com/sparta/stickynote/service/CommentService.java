@@ -17,6 +17,7 @@ import com.sparta.stickynote.repository.NoteRepository;
 @Service
 public class CommentService {
 
+
 	private final NoteRepository noteRepository;
 	private final CommentRepository commentRepository;
 
